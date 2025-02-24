@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from '../../service/yaml-parser/yaml-parser.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { ElementRef, ViewChild } from '@angular/core';
@@ -94,6 +94,8 @@ export class MappingComponent implements OnInit {
   );
 
   YamlObject: any;
+  knowledgeLabels: string[] = [];
+  generalLabels: string[] = [];
 
   allTeams: string[] = [];
 
@@ -108,10 +110,6 @@ export class MappingComponent implements OnInit {
   allDimensionNames: string[] = [];
   temporaryMappingElement: any;
 
-  //labels
-  knowledgeLabels: string[] = [];
-  generalLabels: string[] = [];
-
   separatorKeysCodes: number[] = [ENTER, COMMA];
   FilterCtrl = new FormControl('');
   SortCtrl = new FormControl('');
@@ -121,7 +119,7 @@ export class MappingComponent implements OnInit {
 
   @ViewChild('chipInput') chipInput!: ElementRef<HTMLInputElement>;
 
-  constructor(private yaml: ymlService) {
+  constructor(private yaml: YamlParserService) {
     this.filteredChips = this.FilterCtrl.valueChanges.pipe(
       startWith(null),
       map((x: string | null) => (x ? this._filter(x) : this.allChips.slice()))
@@ -129,18 +127,19 @@ export class MappingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    //gets value from meta folder
-    this.yaml.setURI('./assets/YAML/meta.yaml');
+    this.yaml.setUri('./assets/YAML/meta.yaml');
     // Function sets label data
-    this.yaml.getJson().subscribe(data => {
-      //console.log(data)
-      this.knowledgeLabels = data['strings']['en']['KnowledgeLabels'];
-      this.generalLabels = data['strings']['en']['labels'];
+    this.yaml.getJson().subscribe((data: any) => {
+      //console.log(data);
+      this.YamlObject = data;
+      this.knowledgeLabels = this.YamlObject['strings']['en']['KnowledgeLabels'];
+      this.generalLabels = this.YamlObject['strings']['en']['labels'];
     });
+
     //gets value from generated folder
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
+    this.yaml.setUri('./assets/YAML/generated/generated.yaml');
     // Function sets data
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.getJson().subscribe((data: any) => {
       this.YamlObject = data;
       this.allDimensionNames = Object.keys(this.YamlObject);
       for (let i = 0; i < this.allDimensionNames.length; i++) {

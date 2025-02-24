@@ -3,7 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 // import { MatAutocomplete } from '@angular/material/autocomplete';
 import { RouterTestingModule } from '@angular/router/testing';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import { MatrixComponent } from './matrix.component';
 import { MatChip } from '@angular/material/chips';
 
@@ -13,7 +13,7 @@ describe('MatrixComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClientTestingModule],
+      providers: [YamlParserService, HttpClientTestingModule],
       imports: [RouterTestingModule, HttpClientModule],
       declarations: [MatrixComponent, MatChip],
     }).compileComponents();

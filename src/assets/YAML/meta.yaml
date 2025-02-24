@@ -40,8 +40,6 @@ strings:
         'Level 5: Advanced deployment of security practices at scale',
       ]
 # Default team
-teams: ['Default', 'B', 'C']
+teams: ['NewSQL']
 teamGroups:
-  GroupA: ['Default', 'B']
-  GroupB: ['B', 'C']
-  GroupC: ['Default', 'C']
+  NewSQL_Team: ['NewSQL']

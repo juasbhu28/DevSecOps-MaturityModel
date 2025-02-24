@@ -1,6 +1,6 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from '../../service/yaml-parser/yaml-parser.service';
 import { DependencyGraphComponent } from './dependency-graph.component';
 
 describe('DependencyGraphComponent', () => {
@@ -9,7 +9,7 @@ describe('DependencyGraphComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [HttpClient, ymlService, HttpHandler],
+      providers: [HttpClient, YamlParserService, HttpHandler],
       declarations: [DependencyGraphComponent],
     }).compileComponents();
   });

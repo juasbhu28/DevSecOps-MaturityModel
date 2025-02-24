@@ -1,6 +1,6 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import { CircularHeatmapComponent } from './circular-heatmap.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatChip } from '@angular/material/chips';
@@ -11,7 +11,7 @@ describe('CircularHeatmapComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClient, HttpHandler],
+      providers: [YamlParserService, HttpClient, HttpHandler],
       imports: [RouterTestingModule],
       declarations: [CircularHeatmapComponent],
     }).compileComponents();

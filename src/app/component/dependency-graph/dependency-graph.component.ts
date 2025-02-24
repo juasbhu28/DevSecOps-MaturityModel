@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import * as d3 from 'd3';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from 'src/app/service/yaml-parser/yaml-parser.service';
 
 export interface graphNodes {
   id: string;
@@ -35,12 +35,11 @@ export class DependencyGraphComponent implements OnInit {
   @Input() subDimension: string = '';
   @Input() activityName: string = '';
 
-  constructor(private yaml: ymlService) {}
+  constructor(private yaml: YamlParserService) {}
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-    // Function sets data
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.setUri('./assets/YAML/generated/generated.yaml');
+    this.yaml.getJson().subscribe((data: any) => {
       this.graphData = { nodes: [], links: [] };
       this.YamlObject = data[this.dimension][this.subDimension];
       this.populateGraphWithActivitiesCurrentActivityDependsOn(

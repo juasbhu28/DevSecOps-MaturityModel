@@ -1,28 +1,43 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { map, catchError } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
 import { parse } from 'yamljs';
 
-@Injectable()
-export class ymlService {
-  private URI: string = './';
+@Injectable({
+  providedIn: 'root'
+})
+export class YamlParserService {
+  private uri: string = './';
 
   constructor(private http: HttpClient) {}
 
-  setURI(URI_used: string) {
-    this.URI = URI_used;
+  setUri(uri: string): void {
+    this.uri = uri;
   }
 
-  public getJson(): Observable<any> {
+  public getJson(): Observable<unknown> {
     return this.http
-      .get(this.URI, {
+      .get(this.uri, {
         observe: 'body',
-        responseType: 'text', // This one here tells HttpClient to parse it as text, not as JSON
+        responseType: 'text'
       })
       .pipe(
-        // Map Yaml to JavaScript Object
-        map(yamlString => parse(yamlString))
+        map(yamlString => {
+          try {
+            return parse(yamlString);
+          } catch (error) {
+            throw new Error(`Failed to parse YAML: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          }
+        }),
+        catchError(this.handleError)
       );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    const message = error.error instanceof Error ?
+      error.error.message :
+      `Server returned code ${error.status} with body "${error.error}"`;
+    return throwError(() => new Error(message));
   }
 }

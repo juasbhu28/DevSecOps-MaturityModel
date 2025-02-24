@@ -1,8 +1,7 @@
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { sample } from 'rxjs';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from 'src/app/service/yaml-parser/yaml-parser.service';
 
 import { ActivityDescriptionComponent } from './activity-description.component';
 
@@ -12,7 +11,7 @@ describe('ActivityDescriptionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [ymlService, HttpClient, HttpHandler],
+      providers: [YamlParserService, HttpClient, HttpHandler],
       imports: [RouterTestingModule],
       declarations: [ActivityDescriptionComponent],
     }).compileComponents();

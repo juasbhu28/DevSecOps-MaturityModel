@@ -22,7 +22,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "allowedCommonJsDependencies": ["yamljs"],
+            "allowedCommonJsDependencies": ["yamljs", "qs"],
             "assets": [
               "src/favicon.ico",
               "src/assets"
@@ -31,7 +31,8 @@
               "src/custom-theme.scss",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "aot": true
           },
           "configurations": {
             "production": {

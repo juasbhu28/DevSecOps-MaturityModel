@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ymlService } from 'src/app/service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from 'src/app/service/yaml-parser/yaml-parser.service';
 import * as yaml from 'js-yaml';
 
 @Component({
@@ -12,12 +12,11 @@ export class TeamsComponent implements OnInit {
   teamList: any;
   teamGroups: Map<string, string[]> = new Map();
 
-  constructor(private yaml: ymlService) {}
+  constructor(private yaml: YamlParserService) {}
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
-    // Function sets column header
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.setUri('./assets/YAML/meta.yaml');
+    this.yaml.getJson().subscribe((data: any) => {
       this.YamlObject = data;
 
       console.log(this.YamlObject);

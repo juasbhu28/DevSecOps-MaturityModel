@@ -4,16 +4,16 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { ymlService } from './yaml-parser.service';
+import { YamlParserService } from './yaml-parser.service';
 
 describe('YAMLParserService', () => {
-  let service: ymlService;
+  let service: YamlParserService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [HttpClientTestingModule, ymlService, HttpClient, HttpHandler],
+      providers: [HttpClientTestingModule, YamlParserService, HttpClient, HttpHandler],
     });
-    service = TestBed.inject(ymlService);
+    service = TestBed.inject(YamlParserService);
   });
 
   it('should be created', () => {

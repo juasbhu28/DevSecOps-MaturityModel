@@ -1,9 +1,9 @@
 ---
 #
-# Teams
+# Teams template
 #
 teams: ['A', 'B', 'C']
 teamGroups:
   AB: ['A', 'B']
   BC: ['B', 'C']
-  AC: ['A', 'C']
+  C: ['C']

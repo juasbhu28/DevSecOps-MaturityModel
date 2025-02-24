@@ -1,14 +1,86 @@
 import { Component, ViewChildren, QueryList, OnInit } from '@angular/core';
 import { MatAccordion } from '@angular/material/expansion';
 import { ActivatedRoute } from '@angular/router';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from '../../service/yaml-parser/yaml-parser.service';
 import * as md from 'markdown-it';
+import { map } from 'rxjs/operators';
 
+/**
+ * Interface for meta data strings
+ * @author jbotello_meli
+ */
+interface MetaStrings {
+  strings: {
+    en: {
+      labels: string[];
+      KnowledgeLabels: string[];
+    };
+  };
+  teams: string[];
+}
+
+/**
+ * Interface for implementation details
+ * @author jbotello_meli
+ */
 export interface implementation {
   name: string;
   tags: string[];
   url: string;
   description: string;
+}
+
+/**
+ * Interface for difficulty of implementation
+ * @author jbotello_meli
+ */
+interface DifficultyOfImplementation {
+  knowledge: number;
+  time: number;
+  resources: number;
+}
+
+/**
+ * Interface for references
+ * @author jbotello_meli
+ */
+interface References {
+  'iso27001-2017': string[];
+  'iso27001-2022': string[];
+  samm2: string[];
+  openCRE: string[];
+}
+
+/**
+ * Interface for meta information
+ * @author jbotello_meli
+ */
+interface Meta {
+  implementationGuide: string;
+}
+
+/**
+ * Interface for generated YAML data
+ * @author jbotello_meli
+ */
+interface GeneratedYamlData {
+  description: string;
+  uuid: string;
+  risk: string;
+  tags: string[];
+  measure: string;
+  meta?: Meta;
+  usefulness?: number;
+  difficultyOfImplementation?: DifficultyOfImplementation;
+  references?: References;
+  dependsOn: string[];
+  implementation: implementation[];
+  evidence: string;
+  comments: string;
+  assessment: string;
+  isImplemented: boolean;
+  teamsImplemented: Record<string, any>;
+  teamsEvidence: Record<string, string>;
 }
 
 export interface activityDescription {
@@ -86,7 +158,7 @@ export class ActivityDescriptionComponent implements OnInit {
   ISO22Version: string = 'ISO 27001:2022';
   openCREVersion: string = 'OpenCRE';
   @ViewChildren(MatAccordion) accordion!: QueryList<MatAccordion>;
-  constructor(private route: ActivatedRoute, private yaml: ymlService) {}
+  constructor(private route: ActivatedRoute, private yaml: YamlParserService) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -94,207 +166,122 @@ export class ActivityDescriptionComponent implements OnInit {
     });
 
     //gets value from sample file
-    this.yaml.setURI('./assets/YAML/meta.yaml');
-    // Function sets label data
+    this.yaml.setUri('./assets/YAML/meta.yaml');
     console.log(this.perfNow() + 's: meta.yaml fetch');
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.getJson().pipe(
+      map((data: unknown) => data as MetaStrings)
+    ).subscribe(data => {
       console.log(this.perfNow() + 's: meta.yaml');
-      this.GeneralLabels = data['strings']['en']['labels'];
-      this.KnowledgeLabels = data['strings']['en']['KnowledgeLabels'];
-      this.TeamList = data['teams']; // Genuine teams (the true source)
+      this.GeneralLabels = data.strings.en.labels;
+      this.KnowledgeLabels = data.strings.en.KnowledgeLabels;
+      this.TeamList = data.teams;
       console.log(this.perfNow() + 's: meta.yaml processed');
     });
+
     //gets value from generated folder
     console.log(this.perfNow() + 's: generated.yaml fetch');
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
-    // Function sets data
-    this.yaml.getJson().subscribe(data => {
+    this.yaml.setUri('./assets/YAML/generated/generated.yaml');
+    this.yaml.getJson().pipe(
+      map((data: unknown) => data as GeneratedYamlData)
+    ).subscribe(data => {
       console.log(this.perfNow() + 's: generated.yaml downloaded');
       this.YamlObject = data;
 
-      var allDimensionNames = Object.keys(this.YamlObject);
-      for (let i = 0; i < allDimensionNames.length; i++) {
-        var subdimensionsInCurrentDimension = Object.keys(
-          this.YamlObject[allDimensionNames[i]]
-        );
+      this.currentActivity.description = this.defineStringValues(data.description, '');
+      this.currentActivity.uuid = this.defineStringValues(data.uuid, '');
+      this.currentActivity.risk = this.defineStringValues(data.risk, '');
+      this.currentActivity.tags = this.defineStringArrayValues(data.tags, []);
+      this.currentActivity.measure = this.defineStringValues(data.measure, '');
 
-        for (let j = 0; j < subdimensionsInCurrentDimension.length; j++) {
-          var temp: any = {
-            Dimension: allDimensionNames[i],
-            SubDimension: subdimensionsInCurrentDimension[j],
-          };
-          var activityInCurrentSubDimension: string[] = Object.keys(
-            this.YamlObject[allDimensionNames[i]][
-              subdimensionsInCurrentDimension[j]
-            ]
-          );
-
-          for (let a = 0; a < activityInCurrentSubDimension.length; a++) {
-            var currentActivityName = activityInCurrentSubDimension[a];
-
-            try {
-              if (
-                this.YamlObject[allDimensionNames[i]][
-                  subdimensionsInCurrentDimension[j]
-                ][currentActivityName].uuid == this.currentActivity.uuid
-              ) {
-                data =
-                  this.YamlObject[allDimensionNames[i]][
-                    subdimensionsInCurrentDimension[j]
-                  ][currentActivityName];
-                this.currentActivity = JSON.parse(JSON.stringify(data)); // Creates a deep copy of current activity to keep two seperate versions - with and without martkdown
-                this.currentActivity.dimension = allDimensionNames[i];
-                this.currentActivity.subDimension =
-                  subdimensionsInCurrentDimension[j];
-                this.currentActivity.activityName = currentActivityName;
-                console.log('found');
-                break;
-              }
-            } catch {
-              console.log('Level for activity does not exist');
-            }
-          }
-        }
-      }
-
-      this.currentActivity.description = this.defineStringValues(
-        data['description'],
-        ''
-      );
-      this.currentActivity.uuid = this.defineStringValues(data['uuid'], '');
-      this.currentActivity.risk = this.defineStringValues(data['risk'], '');
-      this.currentActivity.tags = this.defineStringArrayValues(
-        data['tags'],
-        []
-      );
-      this.currentActivity.measure = this.defineStringValues(
-        data['measure'],
-        ''
-      );
-      try {
-        data['meta'];
+      if (data.meta?.implementationGuide) {
         this.currentActivity.implementatonGuide = this.defineStringValues(
-          data['meta']['implementationGuide'],
+          data.meta.implementationGuide,
           ''
         );
-      } catch {
-        console.log('Meta does not exist');
       }
-      try {
-        data['usefulness'];
-        this.currentActivity.usefulness = this.defineIntegerValues(
-          data['usefulness'],
-          -1
-        );
-      } catch {
-        console.log('Meta does not exist');
-      }
-      try {
-        data['difficultyOfImplementation'];
+
+      if (data.difficultyOfImplementation) {
         this.currentActivity.knowledge = this.defineIntegerValues(
-          data['difficultyOfImplementation']['knowledge'],
+          data.difficultyOfImplementation.knowledge,
           -1
         );
         this.currentActivity.time = this.defineIntegerValues(
-          data['difficultyOfImplementation']['time'],
+          data.difficultyOfImplementation.time,
           -1
         );
         this.currentActivity.resources = this.defineIntegerValues(
-          data['difficultyOfImplementation']['resources'],
+          data.difficultyOfImplementation.resources,
           -1
         );
-      } catch {
-        console.log('difficultyOfImplementation does not exist');
       }
-      try {
-        data['references'];
+
+      if (data.references) {
         this.currentActivity.iso = this.defineStringArrayValues(
-          data['references']['iso27001-2017'],
+          data.references['iso27001-2017'],
           []
         );
         this.currentActivity.iso22 = this.defineStringArrayValues(
-          data['references']['iso27001-2022'],
+          data.references['iso27001-2022'],
           []
         );
         this.currentActivity.samm = this.defineStringArrayValues(
-          data['references']['samm2'],
+          data.references.samm2,
           []
         );
         this.currentActivity.openCRE = this.defineStringArrayValues(
-          data['references']['openCRE'],
+          data.references.openCRE,
           []
         );
-      } catch {
-        console.log('references does not exist');
       }
 
-      this.currentActivity.dependsOn = this.defineStringArrayValues(
-        data['dependsOn'],
-        []
-      );
+      if (data.usefulness !== undefined) {
+        this.currentActivity.usefulness = this.defineIntegerValues(
+          data.usefulness,
+          -1
+        );
+      }
 
-      this.currentActivity.implementation = this.defineImplementationObject(
-        data['implementation']
-      );
+      this.currentActivity.dependsOn = this.defineStringArrayValues(data.dependsOn, []);
+      this.currentActivity.implementation = this.defineImplementationObject(data.implementation);
+      this.currentActivity.evidence = this.defineStringValues(data.evidence, '');
+      this.currentActivity.comments = this.defineStringValues(data.comments, '');
+      this.currentActivity.assessment = this.defineStringValues(data.assessment, '');
+      this.currentActivity.isImplemented = this.defineBooleanValues(data.isImplemented, false);
 
-      this.currentActivity.evidence = this.defineStringValues(
-        data['evidence'],
-        ''
-      );
+      let combinedTeamsImplemented: Record<string, any> = {};
+      const dataFromLocalStorage: string | null = localStorage.getItem('dataset');
 
-      this.currentActivity.comments = this.defineStringValues(
-        data['comments'],
-        ''
-      );
-
-      this.currentActivity.assessment = this.defineStringValues(
-        data['assessment'],
-        ''
-      );
-      this.currentActivity.isImplemented = this.defineBooleanValues(
-        data['isImplemented'],
-        false
-      );
-      let combinedTeamsImplemented: any = {};
-      const dataFromLocalStorage: string | null =
-        localStorage.getItem('dataset');
       if (dataFromLocalStorage !== null) {
-        let localData = JSON.parse(dataFromLocalStorage);
+        const localData = JSON.parse(dataFromLocalStorage);
         let localDataActivity = null;
 
-        // Find the activity with the correct uuid
-        for (let subdim of localData) {
-          for (let activity of subdim?.Activity) {
-            if (activity?.uuid === data?.uuid) {
-              console.log('Found', activity);
-              localDataActivity = activity;
-              break;
+        for (const subdim of localData) {
+          if (subdim?.Activity) {
+            for (const activity of subdim.Activity) {
+              if (activity?.uuid === data.uuid) {
+                console.log('Found', activity);
+                localDataActivity = activity;
+                break;
+              }
             }
           }
           if (localDataActivity) break;
         }
 
-        // Combine teams status from local storage and loaded yaml file
-        combinedTeamsImplemented = Object.assign(
-          {},
-          localDataActivity?.teamsImplemented,
-          this.currentActivity?.teamsImplemented
-        );
+        combinedTeamsImplemented = {
+          ...(localDataActivity?.teamsImplemented || {}),
+          ...(data.teamsImplemented || {})
+        };
       } else {
-        combinedTeamsImplemented = data['teamsImplemented'];
+        combinedTeamsImplemented = data.teamsImplemented || {};
       }
 
-      // Only keep genuine teams
       this.currentActivity.teamsImplemented = {};
-      for (let team of this.TeamList) {
-        this.currentActivity.teamsImplemented[team] =
-          combinedTeamsImplemented[team];
+      for (const team of this.TeamList) {
+        this.currentActivity.teamsImplemented[team] = combinedTeamsImplemented[team];
       }
 
-      this.currentActivity.teamsEvidence = this.defineEvidenceObject(
-        data['teamsEvidence']
-      );
-      // console.log("data['teamsEvidence']", data['teamsEvidence']);
+      this.currentActivity.teamsEvidence = this.defineEvidenceObject(data.teamsEvidence);
       this.openall();
       console.log(this.perfNow() + 's: generated.yaml processed');
     });

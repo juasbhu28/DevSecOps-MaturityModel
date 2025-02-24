@@ -5,7 +5,7 @@ import {
   QueryList,
   ChangeDetectorRef,
 } from '@angular/core';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from '../../service/yaml-parser/yaml-parser.service';
 import * as d3 from 'd3';
 import * as yaml from 'js-yaml';
 import { Router } from '@angular/router';
@@ -60,7 +60,7 @@ export class CircularHeatmapComponent implements OnInit {
   markdown: md = md();
 
   constructor(
-    private yaml: ymlService,
+    private yaml: YamlParserService,
     private router: Router,
     private changeDetector: ChangeDetectorRef
   ) {
@@ -86,7 +86,7 @@ export class CircularHeatmapComponent implements OnInit {
   private LoadMaturityDataFromGeneratedYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityData Fetch`);
-      this.yaml.setURI('./assets/YAML/generated/generated.yaml');
+      this.yaml.setUri('./assets/YAML/generated/generated.yaml');
       this.yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadMaturityData Downloaded`);
         this.YamlObject = data;
@@ -228,7 +228,7 @@ export class CircularHeatmapComponent implements OnInit {
   private LoadTeamsFromMetaYaml() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
+      this.yaml.setUri('./assets/YAML/meta.yaml');
       this.yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadTeamsFromMetaYaml Downloaded`);
         this.YamlObject = data;
@@ -252,7 +252,7 @@ export class CircularHeatmapComponent implements OnInit {
   private LoadMaturityLevels() {
     return new Promise<void>((resolve, reject) => {
       console.log(`${this.perfNow()}s: LoadMaturityLevels Fetch`);
-      this.yaml.setURI('./assets/YAML/meta.yaml');
+      this.yaml.setUri('./assets/YAML/meta.yaml');
       // Function sets column header
       this.yaml.getJson().subscribe(data => {
         console.log(`${this.perfNow()}s: LoadMaturityLevels Downloaded`);

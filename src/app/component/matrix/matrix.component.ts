@@ -4,7 +4,7 @@ import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatTableDataSource } from '@angular/material/table';
-import { ymlService } from '../../service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from '../../service/yaml-parser/yaml-parser.service';
 import { Router, NavigationExtras } from '@angular/router';
 import { stringify } from 'qs';
 
@@ -39,7 +39,7 @@ export class MatrixComponent implements OnInit {
   activityVisible: string[] = [];
   allDimensionNames: string[] = [];
 
-  constructor(private yaml: ymlService, private router: Router) {
+  constructor(private yaml: YamlParserService, private router: Router) {
     this.filteredSubDimension = this.rowCtrl.valueChanges.pipe(
       startWith(null),
       map((row: string | null) =>
@@ -61,7 +61,7 @@ export class MatrixComponent implements OnInit {
   // function to initialize if level columns exists
 
   ngOnInit(): void {
-    this.yaml.setURI('./assets/YAML/meta.yaml');
+    this.yaml.setUri('./assets/YAML/meta.yaml');
     // Function sets column header
     this.yaml.getJson().subscribe(data => {
       this.YamlObject = data;
@@ -77,7 +77,7 @@ export class MatrixComponent implements OnInit {
     var activitySet = new Set();
 
     //gets value from generated folder
-    this.yaml.setURI('./assets/YAML/generated/generated.yaml');
+    this.yaml.setUri('./assets/YAML/generated/generated.yaml');
     // Function sets data
     this.yaml.getJson().subscribe(data => {
       this.YamlObject = data;

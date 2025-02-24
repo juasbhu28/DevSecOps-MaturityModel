@@ -11,7 +11,7 @@ import { MatrixComponent } from './component/matrix/matrix.component';
 import { SidenavButtonsComponent } from './component/sidenav-buttons/sidenav-buttons.component';
 import { TopHeaderComponent } from './component/top-header/top-header.component';
 import { ActivityDescriptionComponent } from './component/activity-description/activity-description.component';
-import { ymlService } from './service/yaml-parser/yaml-parser.service';
+import { YamlParserService } from './service/yaml-parser/yaml-parser.service';
 import { HttpClientModule } from '@angular/common/http';
 import { CircularHeatmapComponent } from './component/circular-heatmap/circular-heatmap.component';
 import { MappingComponent } from './component/mapping/mapping.component';
@@ -49,7 +49,7 @@ import { ToStringValuePipe } from './pipe/to-string-value.pipe';
     ReactiveFormsModule,
     HttpClientModule,
   ],
-  providers: [ymlService],
+  providers: [YamlParserService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
