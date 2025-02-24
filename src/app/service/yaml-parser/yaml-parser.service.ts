@@ -20,12 +20,18 @@ export class YamlParserService {
     return this.http
       .get(this.uri, {
         observe: 'body',
-        responseType: 'text'
+        responseType: 'text',
+        headers: {
+          'Content-Type': 'text/yaml;charset=UTF-8'
+        }
       })
       .pipe(
         map(yamlString => {
           try {
-            return parse(yamlString);
+            const parsedYaml = parse(yamlString);
+            return this.decodeYamlSpecialCharacters(parsedYaml);
+
+            return this.decodeYamlSpecialCharacters(parsedYaml);
           } catch (error) {
             throw new Error(`Failed to parse YAML: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
@@ -34,10 +40,40 @@ export class YamlParserService {
       );
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    const message = error.error instanceof Error ?
-      error.error.message :
-      `Server returned code ${error.status} with body "${error.error}"`;
-    return throwError(() => new Error(message));
+  private decodeSpecialCharacters(text: string): string {
+    if (!text || text === 'false') {
+      return text;
+    }
+    return text.replace(/\\x([0-9A-Fa-f]{2})/g, (match, p1) =>
+      String.fromCharCode(parseInt(p1, 16))
+    );
+  }
+
+  private decodeYamlSpecialCharacters(obj: any): any {
+    if (!obj || obj === false) {
+      return obj;
+    }
+
+    if (typeof obj === 'string') {
+      return this.decodeSpecialCharacters(obj);
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.decodeYamlSpecialCharacters(item));
+    }
+
+    if (typeof obj === 'object') {
+      const decodedObj: any = {};
+      Object.keys(obj).forEach(key => {
+        decodedObj[key] = this.decodeYamlSpecialCharacters(obj[key]);
+      });
+      return decodedObj;
+    }
+
+    return obj;
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    return throwError(() => error);
   }
 }
